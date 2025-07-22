@@ -1,0 +1,23 @@
+{
+  "name": "clicklink-extension",
+  "version": "1.1.0",
+  "description": "Chrome extension for capturing high-quality image URLs",
+  "scripts": {
+    "build": "echo 'No build process needed for this extension'",
+    "zip": "powershell -Command \"Compress-Archive -Path .\\* -DestinationPath .\\clicklink-v1.1.zip -Force\"",
+    "clean": "powershell -Command \"Remove-Item .\\*.zip -ErrorAction SilentlyContinue\""
+  },
+  "keywords": [
+    "chrome-extension",
+    "image-capture",
+    "url-extraction",
+    "browser-extension"
+  ],
+  "author": "Developer",
+  "license": "MIT",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "local"
+  }
+}

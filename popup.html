@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClickLink</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 220px;
+      padding: 15px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+    
+    h2 {
+      margin: 0 0 15px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .3s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    
+    input:checked + .slider {
+      background-color: #4CAF50;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    
+    .status-container {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 15px;
+    }
+    
+    .status-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    #stored-url {
+      font-size: 18px;
+      font-weight: 600;
+      color: #2196F3;
+    }
+    
+    .button-container {
+      display: flex;
+      gap: 8px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    #clear-btn {
+      background-color: #ff4757;
+      color: white;
+    }
+    
+    #clear-btn:hover {
+      background-color: #ff3838;
+    }
+    
+    #export-btn {
+      background-color: #2196F3;
+      color: white;
+    }
+    
+    #export-btn:hover {
+      background-color: #1976D2;
+    }
+    
+    #dedupe-btn {
+      background-color: #ff9500;
+      color: white;
+      font-size: 12px;
+    }
+    
+    #dedupe-btn:hover {
+      background-color: #e8890b;
+    }
+    
+    #debug-btn {
+      background-color: #6c757d;
+      color: white;
+      font-size: 12px;
+    }
+    
+    #debug-btn:hover {
+      background-color: #5a6268;
+    }
+    
+    #test-btn {
+      background-color: #28a745;
+      color: white;
+      font-size: 12px;
+    }
+    
+    #test-btn:hover {
+      background-color: #218838;
+    }
+    
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .instruction {
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <h2>ClickLink</h2>
+  
+  <div class="toggle-container">
+    <span class="toggle-label">Alt + Right Click</span>
+    <label class="switch">
+      <input type="checkbox" id="feature-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+  
+  <div class="status-container">
+    <div class="status-title">URLs Captured</div>
+    <div id="stored-url">0</div>
+  </div>
+  
+  <div class="button-container">
+    <button id="clear-btn" title="Clear all captured URLs">Clear</button>
+    <button id="export-btn" title="Export URLs as text file">Export TXT</button>
+  </div>
+  
+  <div class="button-container" style="margin-top: 8px;">
+    <button id="dedupe-btn" title="Remove duplicate URLs">Remove Duplicates</button>
+  </div>
+  
+  <div class="button-container" style="margin-top: 8px;">
+    <button id="debug-btn" title="Show debug info in console">Debug Info</button>
+  </div>
+  
+  <div class="button-container" style="margin-top: 8px;">
+    <button id="test-btn" title="Add test URLs for testing">Add Test URLs</button>
+  </div>
+  
+  <div class="instruction">
+    Enable the toggle and Alt+Right click on images to capture their URLs
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
