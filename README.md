@@ -1,113 +1,266 @@
-# ClickLink - Image URL Capture Extension
+# ClickLink - Chrome Extension
 
-A Chrome extension that allows you to quickly capture high-quality image URLs using Alt+Right Click.
+A powerful Chrome extension for capturing high-quality image URLs with a simple Alt+Right Click gesture. Perfect for researchers, designers, and anyone who needs to collect image URLs efficiently.
 
-## Features
+## 🚀 Features
 
-- **Alt+Right Click**: Capture image URLs with a simple keyboard+mouse combination
-- **Smart URL Detection**: Automatically finds the highest quality version of images
-- **Bulk Export**: Export all captured URLs as a text file
-- **Visual Feedback**: Images briefly highlight when captured
-- **Context Menu**: Alternative capture method via right-click menu
-- **Persistent Storage**: URLs are saved across browser sessions
-- **Duplicate Management**: Remove duplicate URLs with one click
-- **Debug Tools**: Built-in debugging and testing features
+- **Smart Image Capture**: Alt+Right Click on any image to capture its highest quality URL
+- **High-Quality Detection**: Automatically finds the best resolution version of images
+- **Dual Export Modes**: Export as text file (URLs) or ZIP file (actual images)
+- **Duplicate Management**: Built-in duplicate detection and removal
+- **Visual Feedback**: Green outline confirmation when images are captured
+- **Storage Management**: View captured URL count and manage your collection
+- **Debug Tools**: Built-in debugging and testing utilities
 
-## How to Use
+## 📋 Prerequisites
 
-1. **Enable the extension**: Click the extension icon and toggle "Alt + Right Click" on
-2. **Capture URLs**: Hold Alt and right-click on any image to capture its URL
-3. **View captured URLs**: Click the extension icon to see the count of captured URLs
-4. **Export URLs**: Click "Export TXT" to download all URLs as a text file
-5. **Clear URLs**: Click "Clear" to remove all stored URLs
-6. **Remove Duplicates**: Click "Remove Duplicates" to clean up your URL list
+- **Google Chrome** (version 88 or higher)
+- **Chrome Extensions Developer Mode** enabled (for manual installation)
+- **Internet Connection** (required for ZIP export functionality)
 
-## Smart Image Detection
+## 🔧 Installation
 
-The extension intelligently finds the best quality image URL by checking:
+### Method 1: Manual Installation (Recommended)
 
-- High-resolution srcset attributes
-- Picture element sources
-- Data attributes (data-original, data-src, etc.)
-- Parent link elements
-- Cleaned up thumbnail URLs
-- URL parameters and page context for base64 images
+1. **Download the Extension**
+   ```bash
+   git clone <repository-url>
+   # OR download and extract the ZIP file
+   ```
 
-## Technical Details
+2. **Enable Developer Mode**
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Toggle "Developer mode" in the top-right corner
 
-### Manifest Version 3
-Built using the latest Chrome Extension Manifest V3 with:
-- Service worker background script
-- Content script injection
-- Storage permissions
-- Context menu integration
+3. **Load the Extension**
+   - Click "Load unpacked"
+   - Select the `click-link-extension` folder
+   - The extension icon should appear in your toolbar
 
-### Files Structure
-- `manifest.json` - Extension configuration
-- `background.js` - Service worker with context menu handling
-- `content.js` - Main functionality for URL capture
-- `content_optimized.js` - Optimized version of content script
-- `popup.html/js` - Extension popup interface
-- `images/` - Extension icons
-- `package.json` - Project configuration and build scripts
+**Note**: All required files including `jszip.min.js` are included in the package.
 
-### Permissions
-- `storage` - To save captured URLs
-- `contextMenus` - For right-click menu integration
+### Method 2: Build from Source
 
-## Development
+1. **Clone Repository**
+   ```bash
+   git clone <repository-url>
+   cd click-link-extension
+   ```
 
-### Prerequisites
-- Chrome browser
-- Developer mode enabled in Chrome Extensions
+2. **Install Dependencies** (Optional)
+   ```bash
+   npm install
+   ```
 
-### Installation
-1. Clone or download this repository
-2. Open Chrome and navigate to `chrome://extensions/`
-3. Enable "Developer mode"
-4. Click "Load unpacked" and select the extension directory
+3. **Create Distribution Package**
+   ```bash
+   npm run zip
+   ```
+
+## 📖 Usage Guide
+
+### Basic Usage
+
+1. **Enable the Extension**
+   - Click the ClickLink icon in your Chrome toolbar
+   - Toggle "Alt + Right Click" to ON
+
+2. **Capture Image URLs**
+   - Hold `Alt` key
+   - Right-click on any image
+   - See green outline confirmation
+   - URL is automatically stored
+
+3. **View Captured URLs**
+   - Click the extension icon to see count
+   - Use "Export" to download your collection
+
+### Export Options
+
+#### Text Export (Default)
+- Exports all unique URLs as a `.txt` file
+- One URL per line
+- Perfect for bulk downloading or processing
+
+#### ZIP Export (File Mode)
+1. Toggle "File Mode" to ON
+2. Click "Export ZIP"
+3. Downloads actual images in a compressed ZIP file
+4. Images are automatically named (`image-1.jpg`, `image-2.png`, etc.)
+
+### Management Features
+
+- **Clear All**: Remove all captured URLs
+- **Remove Duplicates**: Clean up duplicate entries
+- **Debug Info**: View detailed storage information
+- **Test URLs**: Add sample URLs for testing
+
+## 🛠️ Technical Details
+
+### Architecture
+
+```
+├── manifest.json          # Extension configuration
+├── background.js          # Service worker for extension lifecycle
+├── content.js            # Main capture logic and DOM interaction
+├── popup.html            # Extension popup interface
+├── popup.js              # Popup functionality and UI logic
+├── jszip.min.js          # ZIP file generation library
+└── images/               # Extension icons
+    ├── icon16.png
+    ├── icon48.png
+    └── icon128.png
+```
+
+### Key Technologies
+
+- **Manifest V3**: Latest Chrome extension standard
+- **Chrome Storage API**: Local data persistence
+- **JSZip Library**: ZIP file generation for image export
+- **Content Scripts**: DOM interaction and event handling
+- **Service Workers**: Background processing
+
+### Permissions Required
+
+- `storage`: Save captured URLs locally
+- `contextMenus`: Alternative capture method
+- `downloads`: File export functionality
+
+### Smart Image Detection
+
+The extension uses advanced algorithms to find the highest quality image:
+
+1. **Picture Element Sources**: Checks `<picture>` elements for high-res sources
+2. **Parent Link Detection**: Looks for parent `<a>` tags linking to full images
+3. **High-Quality Attributes**: Searches for data attributes like:
+   - `data-src-original`
+   - `data-high-res-src`
+   - `data-zoom-image`
+   - And 15+ other common patterns
+4. **Srcset Processing**: Extracts highest resolution from `srcset` attributes
+5. **URL Cleaning**: Removes thumbnail indicators from URLs
+6. **Base64 Handling**: Attempts to find original URLs for base64 images
+
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**Extension not capturing images:**
+- Ensure "Alt + Right Click" toggle is enabled
+- Check that you're holding Alt while right-clicking
+- Verify the target is actually an `<img>` element
+
+**Export not working:**
+- Check browser's download settings
+- Ensure popup blockers aren't interfering
+- For ZIP export, verify internet connection
+
+**No URLs showing:**
+- Use "Debug Info" button to check storage
+- Try "Add Test URLs" to verify functionality
+- Check browser console for error messages
+
+### Debug Mode
+
+1. Click "Debug Info" in the popup
+2. Open Chrome DevTools (F12)
+3. Check Console tab for detailed logs
+4. Look for "ClickLink:" prefixed messages
+
+### Storage Issues
+
+If URLs aren't being saved:
+```javascript
+// Check storage in DevTools Console
+chrome.storage.local.get(null, console.log);
+
+// Clear storage if needed
+chrome.storage.local.clear();
+```
+
+## 🔒 Privacy & Security
+
+- **Local Storage Only**: All data stays on your device
+- **No External Servers**: No data transmitted to third parties
+- **Minimal Permissions**: Only requests necessary permissions
+- **Open Source**: Full code transparency
+
+## 🚧 Development
+
+### Project Structure
+
+```
+click-link-extension/
+├── src/
+│   ├── background.js     # Service worker
+│   ├── content.js        # Content script
+│   ├── popup.html        # UI template
+│   └── popup.js          # UI logic
+├── images/               # Icons and assets
+├── manifest.json         # Extension manifest
+├── package.json          # NPM configuration
+└── README.md            # This file
+```
 
 ### Build Scripts
-The extension includes several utility scripts in package.json:
-- `npm run build` - Placeholder for build process
-- `npm run zip` - Creates a ZIP archive of the extension
-- `npm run clean` - Removes ZIP files
 
-### Optimization Features
-- Modern ES6+ JavaScript
-- Comprehensive error handling and logging
-- Performance optimizations with passive event listeners
-- Modular code structure
-- Enhanced UI/UX design
-- Promise-based storage operations
-- Verification and fallback mechanisms
+```bash
+# Create distribution ZIP
+npm run zip
 
-## Privacy
-This extension:
-- Only processes data locally on your device
-- Does not send any data to external servers
-- Stores URLs in Chrome's local storage
-- Only activates when explicitly enabled by the user
+# Clean build artifacts
+npm run clean
 
-## Version History
+# Development (no build needed)
+# Just load unpacked in Chrome
+```
 
-### Current
-- Added duplicate URL management
-- Enhanced debugging tools
-- Improved error handling with fallback mechanisms
-- Added visual feedback for captured images
-- Better image quality detection algorithms
-- Optimized storage operations with Promise-based approach
-- Added test URL feature for development
+### Testing
 
-### Initial Release
-- Basic Alt+Right Click functionality
-- URL storage and export
+1. **Manual Testing**
+   - Use "Add Test URLs" button
+   - Test on various websites
+   - Verify export functionality
 
-## License
+2. **Console Debugging**
+   - Enable verbose logging
+   - Monitor storage operations
+   - Check error handling
 
-MIT License - Feel free to modify and distribute.
+## 📝 Changelog
 
-## Support
+### Version 1.1
+- Added ZIP export functionality
+- Improved high-quality image detection
+- Enhanced error handling and logging
+- Added duplicate removal feature
+- Better visual feedback
 
-For issues or feature requests, please check the extension's error console or create an issue in the repository.
+### Version 1.0
+- Initial release
+- Basic Alt+Right Click capture
+- Text export functionality
+- Chrome storage integration
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🆘 Support
+
+For issues, questions, or feature requests:
+1. Check the troubleshooting section above
+2. Use the "Debug Info" feature
+3. Create an issue with detailed information
+
+---
+
+**Made with ❤️ for efficient image URL collection**
