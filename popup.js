@@ -1,6 +1,7 @@
 // DOM elements
 const elements = {
   toggle: null,
+  modeToggle: null,
   storedUrlElement: null,
   clearBtn: null,
   exportBtn: null,
@@ -23,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize DOM elements
 function initializeElements() {
   elements.toggle = document.getElementById('feature-toggle');
+  elements.modeToggle = document.getElementById('mode-toggle');
   elements.storedUrlElement = document.getElementById('stored-url');
   elements.clearBtn = document.getElementById('clear-btn');
   elements.exportBtn = document.getElementById('export-btn');
@@ -42,14 +44,16 @@ function initializeElements() {
 
 // Load saved state from storage
 function loadInitialState() {
-  chrome.storage.local.get(['enabled', 'urlList'], (data) => {
+  chrome.storage.local.get(['enabled', 'fileMode', 'urlList'], (data) => {
     if (chrome.runtime.lastError) {
       console.error('ClickLink: Error loading state:', chrome.runtime.lastError);
       return;
     }
     
     elements.toggle.checked = data.enabled || false;
+    elements.modeToggle.checked = data.fileMode || false;
     updateUrlCount(data.urlList || []);
+    updateExportButton(data.fileMode || false);
   });
 }
 
@@ -73,8 +77,9 @@ function updateUrlCount(urlList) {
 
 // Setup event listeners
 function setupEventListeners() {
-  // Toggle change handler
+  // Toggle change handlers
   elements.toggle.addEventListener('change', handleToggleChange);
+  elements.modeToggle.addEventListener('change', handleModeToggleChange);
   
   // Button handlers
   elements.clearBtn.addEventListener('click', handleClearClick);
@@ -126,8 +131,10 @@ function handleClearClick() {
 
 // Handle export button click
 function handleExportClick() {
+  console.log('ClickLink: Export button clicked');
   try {
-    chrome.storage.local.get(['urlList'], (data) => {
+    chrome.storage.local.get(['urlList', 'fileMode'], (data) => {
+      console.log('ClickLink: Storage data:', data);
       if (chrome.runtime.lastError) {
         console.error('ClickLink: Error getting URLs for export:', chrome.runtime.lastError);
         alert('Error accessing stored URLs. Please try again.');
@@ -135,19 +142,28 @@ function handleExportClick() {
       }
       
       const urlList = data.urlList || [];
-      console.log('ClickLink: URLs to export:', urlList);
-      console.log('ClickLink: Total URLs for export:', urlList.length);
+      const fileMode = data.fileMode || false;
+      
+      console.log('ClickLink: URL list:', urlList);
+      console.log('ClickLink: File mode:', fileMode);
       
       if (urlList.length === 0) {
+        console.log('ClickLink: No URLs to export');
         alert('No URLs to export');
         return;
       }
       
-      exportUrlsAsText(urlList);
+      if (fileMode) {
+        console.log('ClickLink: Starting ZIP export');
+        exportImagesAsZip(urlList);
+      } else {
+        console.log('ClickLink: Starting TXT export');
+        exportUrlsAsText(urlList);
+      }
     });
   } catch (error) {
-    console.error('ClickLink: Error exporting URLs:', error);
-    alert('Error exporting URLs. Please try again.');
+    console.error('ClickLink: Error exporting:', error);
+    alert('Error exporting. Please try again.');
   }
 }
 
@@ -242,10 +258,9 @@ function exportUrlsAsText(urlList) {
     console.log('ClickLink: Unique URLs for export:', uniqueUrls);
     console.log('ClickLink: Original count:', urlList.length, 'Unique count:', uniqueUrls.length);
     
-    // Create text content with metadata
+    // Create text content with only URLs
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const header = `# ClickLink Export - ${new Date().toLocaleString()}\n# Total URLs: ${uniqueUrls.length} (${urlList.length} total captures)\n\n`;
-    const textContent = header + uniqueUrls.join('\n');
+    const textContent = uniqueUrls.join('\n');
     
     console.log('ClickLink: Export content:', textContent);
     
@@ -275,9 +290,88 @@ function exportUrlsAsText(urlList) {
   }
 }
 
+// Handle mode toggle change
+function handleModeToggleChange() {
+  const fileMode = elements.modeToggle.checked;
+  chrome.storage.local.set({ fileMode });
+  updateExportButton(fileMode);
+}
+
+// Update export button text based on mode
+function updateExportButton(fileMode) {
+  elements.exportBtn.textContent = fileMode ? 'Export ZIP' : 'Export TXT';
+  elements.exportBtn.title = fileMode ? 'Export images as ZIP file' : 'Export URLs as text file';
+}
+
+// Export images as ZIP file
+async function exportImagesAsZip(urlList) {
+  console.log('ClickLink: exportImagesAsZip called with:', urlList);
+  try {
+    if (typeof JSZip === 'undefined') {
+      console.error('ClickLink: JSZip not loaded');
+      alert('ZIP library not loaded. Please refresh and try again.');
+      return;
+    }
+    
+    const uniqueUrls = [...new Set(urlList)];
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    console.log('ClickLink: Processing', uniqueUrls.length, 'unique URLs');
+    
+    const zip = new JSZip();
+    const promises = [];
+    
+    uniqueUrls.forEach((url, index) => {
+      const filename = `image-${index + 1}.${getFileExtension(url) || 'jpg'}`;
+      console.log('ClickLink: Fetching', url, 'as', filename);
+      const promise = fetch(url)
+        .then(response => {
+          console.log('ClickLink: Fetch response for', url, ':', response.status);
+          return response.blob();
+        })
+        .then(blob => {
+          console.log('ClickLink: Adding', filename, 'to ZIP');
+          zip.file(filename, blob);
+        })
+        .catch(error => console.error(`ClickLink: Failed to fetch ${url}:`, error));
+      promises.push(promise);
+    });
+    
+    console.log('ClickLink: Waiting for all fetches to complete');
+    await Promise.all(promises);
+    
+    console.log('ClickLink: Generating ZIP file');
+    const zipBlob = await zip.generateAsync({type: 'blob'});
+    const zipUrl = URL.createObjectURL(zipBlob);
+    
+    const downloadLink = document.createElement('a');
+    downloadLink.href = zipUrl;
+    downloadLink.download = `clicklink-images-${timestamp}.zip`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(zipUrl);
+    
+    console.log('ClickLink: ZIP export completed');
+  } catch (error) {
+    console.error('ClickLink: Error in exportImagesAsZip:', error);
+    alert('Error creating ZIP file: ' + error.message);
+  }
+}
+
+// Get file extension from URL
+function getFileExtension(url) {
+  const match = url.match(/\.([a-z0-9]+)(?:[?#]|$)/i);
+  return match ? match[1] : null;
+}
+
 // Handle storage changes
 function handleStorageChange(changes, namespace) {
-  if (namespace === 'local' && changes.urlList) {
-    updateUrlCount(changes.urlList.newValue || []);
+  if (namespace === 'local') {
+    if (changes.urlList) {
+      updateUrlCount(changes.urlList.newValue || []);
+    }
+    if (changes.fileMode) {
+      updateExportButton(changes.fileMode.newValue || false);
+    }
   }
 }

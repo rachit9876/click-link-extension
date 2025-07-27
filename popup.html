@@ -197,6 +197,14 @@
     </label>
   </div>
   
+  <div class="toggle-container">
+    <span class="toggle-label">File Mode</span>
+    <label class="switch">
+      <input type="checkbox" id="mode-toggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+  
   <div class="status-container">
     <div class="status-title">URLs Captured</div>
     <div id="stored-url">0</div>
@@ -204,7 +212,7 @@
   
   <div class="button-container">
     <button id="clear-btn" title="Clear all captured URLs">Clear</button>
-    <button id="export-btn" title="Export URLs as text file">Export TXT</button>
+    <button id="export-btn" title="Export as file">Export</button>
   </div>
   
   <div class="button-container" style="margin-top: 8px;">
@@ -223,6 +231,7 @@
     Enable the toggle and Alt+Right click on images to capture their URLs
   </div>
   
+  <script src="jszip.min.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

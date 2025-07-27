@@ -3,7 +3,7 @@
   "name": "ClickLink",
   "version": "1.1",
   "description": "Capture and store high-quality image URLs with Alt+Right Click",
-  "permissions": ["storage", "contextMenus"],
+  "permissions": ["storage", "contextMenus", "downloads"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
